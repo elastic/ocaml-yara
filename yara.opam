@@ -1,0 +1,19 @@
+opam-version: "2.0"
+maintainer: "Hezekiah Carty <hezekiah.carty@elastic.co>"
+authors: [ "Hezekiah Carty <hezekiah.carty@elastic.co>" ]
+license: "Apache-2.0"
+synopsis: "Interface to libyara"
+homepage: "https://github.com/elastic/ocaml-yara"
+dev-repo: "git+ssh://github.com/elastic/ocaml-yara.git"
+bug-reports: "https://github.com/elastic/ocaml-yara"
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
+  ["dune" "build" "@doc"] {with-doc}
+]
+depends: [
+  "ocaml" {>= "4.07.0"}
+  "ctypes"
+  "ctypes-foreign"
+  "dune" {>= "1.6.0"}
+]
