@@ -156,10 +156,14 @@ module Rules = struct
   let callback_result = view ~read:callback_of_int ~write:int_of_callback int
 
   let callback_c =
-    message_kind @-> ptr void @-> ptr void @-> returning callback_result
+    ptr void
+    @-> message_kind
+    @-> ptr void
+    @-> ptr void
+    @-> returning callback_result
   let callback_ptr = funptr ~runtime_lock:true callback_c
 
-  let wrap_callback f message content _user_data =
+  let wrap_callback f _yara_ctx message content _user_data =
     let content =
       match message with
       | Rule_matching_kind -> Rule_matching (from_voidp Yara_c.Yr_rule.t content)
