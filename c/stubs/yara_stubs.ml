@@ -58,18 +58,23 @@ module Definition (F : Cstubs.FOREIGN) = struct
     let t : t typ = structure "YR_NAMESPACE"
 
     let name = field t "name" string
+    let idx = field t "idx" uint32_t
 
-    (* let () = seal t *)
+    let () = seal t
   end
 
   module Yr_rule = struct
     type t = [ `Yara_rule ] Ctypes.structure
     let t : t typ = structure "YR_RULE"
+    let flags = field t "flags" int32_t
 
     let identifier = field t "identifier" string
+    let tags = field t "tags" string
+    let meta = field t "metas" (ptr void)
+    let strings = field t "strings" (ptr void)
     let namespace = field t "ns" (ptr Yr_namespace.t)
 
-    (* let () = seal t *)
+    let () = seal t
   end
 
   module Yr_rules = struct
