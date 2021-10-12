@@ -35,5 +35,5 @@ let%expect_test "Can parse yara rules" =
       printf "Matches: %s\n" (list_to_string matches);
       printf "Misses: %s\n" (list_to_string misses);
   [%expect {|
-    Matches: (hello_ocam)
+    Matches: (hello_ocaml)
     Misses: () |}]
