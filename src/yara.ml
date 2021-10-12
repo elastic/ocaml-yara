@@ -59,7 +59,8 @@ let err exn =
       if i = 0 then
         ()
       else
-        raise exn)
+        raise exn
+    )
     ~write:(fun () -> 0)
     int
 
@@ -353,7 +354,8 @@ let to_rules raw_rules =
       (fun state raw ->
         match state with
         | Ok () -> Compiler.add_string c raw
-        | Error _ as e -> e)
+        | Error _ as e -> e
+      )
       (Ok ()) raw_rules
   in
   match result with

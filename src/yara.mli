@@ -16,8 +16,8 @@ val initialize_exn : unit -> unit
 (** [initialize ()] must be called from the main thread before the library can
     be used.
 
-    @raise Yara_error if using [initialize_exn] and libyara has a problem during
-    initialization. *)
+    @raise Yara_error
+      if using [initialize_exn] and libyara has a problem during initialization. *)
 
 val finalize : unit -> unit result
 
@@ -25,8 +25,8 @@ val finalize_exn : unit -> unit
 (** [finalize ()] must be called from the main thread once the library is no
     longer in use.
 
-    @raise Yara_error if using [finalize_exn] and libyara has a problem during
-    finalization. *)
+    @raise Yara_error
+      if using [finalize_exn] and libyara has a problem during finalization. *)
 
 (** {3 Error handling} *)
 
