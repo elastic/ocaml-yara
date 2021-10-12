@@ -18,7 +18,7 @@
  (synopsis "Interface to libyara")
  (depends
   (ocaml
-   (>= 4.07.0))
+   (>= 4.11.0))
   ctypes
   ctypes-foreign
   (base

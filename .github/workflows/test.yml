@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system:
+          - ubuntu-latest
+        ocaml-version:
+          - 4.13.x
+          - 4.12.x
+          - 4.11.x
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+          dune-cache: true
+          opam-depext-flags: --with-test
+      - name: Install yara
+        run: sudo apt-get install -y libyara-dev
+      - name: Install dependencies
+        run: |
+          opam pin add yara.dev -n .
+          opam install -t . --deps-only
+      - name: Run tests
+        run: |
+          opam exec -- dune runtest
