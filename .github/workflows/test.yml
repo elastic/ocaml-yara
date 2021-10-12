@@ -25,6 +25,8 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-version }}
           dune-cache: true
           opam-depext-flags: --with-test
+      - name: Install yara
+        run: sudo apt-get install -y libyara-dev
       - name: Install dependencies
         run: |
           opam pin add yara.dev -n .
