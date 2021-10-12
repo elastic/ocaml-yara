@@ -1,4 +1,4 @@
-version = 0.12
+version = 0.19.0
 profile = default
 break-cases = all
 break-fun-decl = fit-or-vertical
@@ -8,7 +8,6 @@ if-then-else = k-r
 indicate-multiline-delimiters = closing-on-separate-line
 leading-nested-match-parens = true
 let-and = sparse
-let-open = preserve
 module-item-spacing = preserve
 parens-ite = true
 parens-tuple-patterns = always

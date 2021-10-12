@@ -1,4 +1,6 @@
 (library
+ (foreign_stubs
+  (language c)
+  (names yara_stubs))
  (public_name yara)
- (c_names yara_stubs)
  (libraries ctypes ctypes.foreign))
