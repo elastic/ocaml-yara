@@ -1,0 +1,35 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(library
+ (name yara_c)
+ (public_name yara.c)
+ (foreign_stubs
+  (language c)
+  (names yara_generated_stubs)
+  (flags
+   (:include c_flags.sexp)))
+ (c_library_flags
+  (:include c_library_flags.sexp))
+ (libraries ctypes.stubs yara.stubs))
+
+(rule
+ (targets c_flags.sexp c_library_flags.sexp c_ctypes_cflags)
+ (action
+  (run ./config/discover.exe)))
+
+(rule
+ (targets yara_generated_stubs.ml)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run stubgen/generate_yara_stubs.exe -ml))))
+
+(rule
+ (targets yara_generated_stubs.c)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run stubgen/generate_yara_stubs.exe))))

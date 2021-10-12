@@ -1,0 +1,32 @@
+(executable
+ (name generate_yara_constants)
+ (modules generate_yara_constants)
+ (libraries yara.constants))
+
+(rule
+ (targets generate_yara_constants.c)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./generate_yara_constants.exe))))
+
+(rule
+ (targets generate_yara_constants_ocaml)
+ (deps
+  (:c_code ./generate_yara_constants.c))
+ (action
+  (run
+   %{ocaml-config:c_compiler}
+   -I
+   %{lib:ctypes:}
+   -I
+   %{ocaml-config:standard_library}
+   %{read-lines:../c_ctypes_cflags}
+   -o
+   %{targets}
+   %{c_code})))
+
+(executable
+ (name generate_yara_stubs)
+ (modules generate_yara_stubs)
+ (libraries yara.stubs))
