@@ -130,8 +130,13 @@ module Rule = struct
     List.of_seq (Queue.to_seq q)
 
   let from_ptr ptr =
+    if is_null ptr then
+      invalid_arg "Unexpected null pointer while parsing YR_RULE";
     let rule = !@ptr in
-    let ns = !@(getf rule Yara_c.Yr_rule.namespace) in
+    let ns = getf rule Yara_c.Yr_rule.namespace in
+    if is_null ns then
+      invalid_arg "Unexpected null pointer while parsing YR_NAMESPACE";
+    let ns = !@ns in
     let identifier = getf rule Yara_c.Yr_rule.identifier in
     let namespace = getf ns Yara_c.Yr_namespace.name in
 
