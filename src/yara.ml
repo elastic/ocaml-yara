@@ -82,16 +82,61 @@ let finalize () =
 let finalize_exn () = Yr.unwrap @@ finalize ()
 
 module Rule = struct
-  type t = Yara_c.Yr_rule.t ptr
+  type metadata =
+    [ `Int of int64
+    | `Bool of bool
+    | `String of string
+    ]
 
-  let get_identifier rule =
-    let rule = !@rule in
-    getf rule Yara_c.Yr_rule.identifier
+  type t = {
+    identifier : string;
+    namespace : string;
+    metadata : (string * metadata) list;
+  }
 
-  let get_namespace rule =
-    let rule = !@rule in
+  let collect_metadata metas =
+    let q = Queue.create () in
+    let ident meta = getf meta Yara_c.Yr_meta.identifier in
+    let rec loop metas =
+      if not (is_null metas) then (
+        let meta = !@metas in
+        let flags = getf meta Yara_c.Yr_meta.flags in
+        let last_in_rule = flags = Yara_c.Constants.meta_flags_last_in_rule in
+        let ident = ident meta in
+        match getf meta Yara_c.Yr_meta.type_ with
+        | Yara_c.Meta_type.Integer ->
+          let v = getf meta Yara_c.Yr_meta.integer in
+          Queue.add (ident, `Int v) q;
+          if not last_in_rule then loop (metas +@ 1)
+        | String ->
+          let v = getf meta Yara_c.Yr_meta.string in
+          Queue.add (ident, `String v) q;
+          if not last_in_rule then loop (metas +@ 1)
+        | Boolean ->
+          let v = getf meta Yara_c.Yr_meta.integer in
+          Queue.add (ident, `Bool (if v > 0L then true else false)) q;
+          if not last_in_rule then loop (metas +@ 1)
+        | Unknown _ -> loop (metas +@ 1)
+      )
+    in
+    loop metas;
+    List.of_seq (Queue.to_seq q)
+
+  let from_ptr ptr =
+    let rule = !@ptr in
     let ns = !@(getf rule Yara_c.Yr_rule.namespace) in
-    getf ns Yara_c.Yr_namespace.name
+    let identifier = getf rule Yara_c.Yr_rule.identifier in
+    let namespace = getf ns Yara_c.Yr_namespace.name in
+
+    let metas = getf rule Yara_c.Yr_rule.meta in
+
+    { identifier; namespace; metadata = collect_metadata metas }
+
+  let get_identifier rule = rule.identifier
+
+  let get_namespace rule = rule.namespace
+
+  let get_metadata rule = rule.metadata
 end
 
 module Rules = struct
@@ -166,9 +211,10 @@ module Rules = struct
   let wrap_callback f _yara_ctx message content _user_data =
     let content =
       match message with
-      | Rule_matching_kind -> Rule_matching (from_voidp Yara_c.Yr_rule.t content)
+      | Rule_matching_kind ->
+        Rule_matching (Rule.from_ptr @@ from_voidp Yara_c.Yr_rule.t content)
       | Rule_not_matching_kind ->
-        Rule_not_matching (from_voidp Yara_c.Yr_rule.t content)
+        Rule_not_matching (Rule.from_ptr @@ from_voidp Yara_c.Yr_rule.t content)
       | Scan_finished_kind -> Scan_finished
       | Import_module_kind -> Import_module
       | Module_imported_kind -> Module_imported

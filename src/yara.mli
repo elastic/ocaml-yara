@@ -37,6 +37,12 @@ val error_to_msg : 'ok result -> ('ok, [ `Msg of string ]) Stdlib.result
 module Rule : sig
   (** {1 Individual yara rules, from a match} *)
 
+  type metadata =
+    [ `Int of int64
+    | `Bool of bool
+    | `String of string
+    ]
+
   type t
   (** A single rule *)
 
@@ -47,6 +53,8 @@ module Rule : sig
   val get_namespace : t -> string
   (** [get_namespace rule] returns the namespace associated with [rule] if it
       has one *)
+
+  val get_metadata : t -> (string * metadata) list
 end
 
 module Rules : sig

@@ -2,5 +2,5 @@
  (name test_yara)
  (inline_tests)
  (preprocess
-  (pps ppx_expect))
+  (pps ppx_expect ppx_sexp_conv))
  (libraries yara base stdio))
