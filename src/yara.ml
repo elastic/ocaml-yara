@@ -124,7 +124,6 @@ module Rule = struct
             )
             q;
           if not last_in_rule then loop (metas +@ 1)
-        | Unknown _ -> loop (metas +@ 1)
       )
     in
     loop metas;

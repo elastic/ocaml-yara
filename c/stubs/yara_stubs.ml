@@ -17,7 +17,6 @@ module Definition (F : Cstubs.FOREIGN) = struct
       | Integer
       | String
       | Boolean
-      | Unknown of int32
 
     let of_int32 t =
       if t = Constants.meta_type_boolean then
@@ -27,13 +26,15 @@ module Definition (F : Cstubs.FOREIGN) = struct
       else if t = Constants.meta_type_string then
         String
       else
-        Unknown t
+        invalid_arg
+          (Printf.sprintf "Unexpected metadata type received from libyara: %ld"
+             t
+          )
 
     let to_int32 = function
       | Integer -> Constants.meta_type_integer
       | Boolean -> Constants.meta_type_boolean
       | String -> Constants.meta_type_string
-      | Unknown t -> t
   end
 
   let meta_type =
