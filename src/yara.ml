@@ -83,10 +83,9 @@ let finalize_exn () = Yr.unwrap @@ finalize ()
 
 module Rule = struct
   type metadata =
-    [ `Int of int64
-    | `Bool of bool
-    | `String of string
-    ]
+    | Int of int64
+    | Bool of bool
+    | String of string
 
   type t = {
     identifier : string;
@@ -106,15 +105,24 @@ module Rule = struct
         match getf meta Yara_c.Yr_meta.type_ with
         | Yara_c.Meta_type.Integer ->
           let v = getf meta Yara_c.Yr_meta.integer in
-          Queue.add (ident, `Int v) q;
+          Queue.add (ident, Int v) q;
           if not last_in_rule then loop (metas +@ 1)
         | String ->
           let v = getf meta Yara_c.Yr_meta.string in
-          Queue.add (ident, `String v) q;
+          Queue.add (ident, String v) q;
           if not last_in_rule then loop (metas +@ 1)
         | Boolean ->
           let v = getf meta Yara_c.Yr_meta.integer in
-          Queue.add (ident, `Bool (if v > 0L then true else false)) q;
+          Queue.add
+            ( ident,
+              Bool
+                ( if v > 0L then
+                  true
+                else
+                  false
+                )
+            )
+            q;
           if not last_in_rule then loop (metas +@ 1)
         | Unknown _ -> loop (metas +@ 1)
       )

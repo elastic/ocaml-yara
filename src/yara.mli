@@ -38,10 +38,9 @@ module Rule : sig
   (** {1 Individual yara rules, from a match} *)
 
   type metadata =
-    [ `Int of int64
-    | `Bool of bool
-    | `String of string
-    ]
+    | Int of int64
+    | Bool of bool
+    | String of string
 
   type t
   (** A single rule *)

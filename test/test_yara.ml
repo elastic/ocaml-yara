@@ -58,9 +58,9 @@ let scan_matching_rules rules input =
 let sexp_of_rule t =
   let sexp_of_metadata (kind : Yara.Rule.metadata) =
     match kind with
-    | `Int i -> [%sexp_of: int64] i
-    | `Bool b -> [%sexp_of: bool] b
-    | `String s -> [%sexp_of: string] s
+    | Yara.Rule.Int i -> [%sexp_of: int64] i
+    | Bool b -> [%sexp_of: bool] b
+    | String s -> [%sexp_of: string] s
   in
   let identifier = Yara.Rule.get_identifier t in
   let namespace = Yara.Rule.get_namespace t in
@@ -74,5 +74,7 @@ let%expect_test "Can parse yara rules with metadata" =
   let rules = prepare_rule test_rule in
   match scan_matching_rules rules "Hello OCaml" with
   | Error err -> printf "%s" (Caml.Format.asprintf "%a" Yara.Rules.pp_error err)
-  | Ok rules -> print_s (sexp_of_list sexp_of_rule rules);
-  [%expect {| ((hello_ocaml default ((category test) (version 1) (test_bool false)))) |}]
+  | Ok rules ->
+    print_s (sexp_of_list sexp_of_rule rules);
+    [%expect
+      {| ((hello_ocaml default ((category test) (version 1) (test_bool false)))) |}]
