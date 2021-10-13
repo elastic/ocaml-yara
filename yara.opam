@@ -13,6 +13,7 @@ depends: [
   "ctypes-foreign"
   "base" {with-test & >= "v0.14" & < "v0.15"}
   "sexplib0" {with-test & >= "v0.14" & < "v0.15"}
+  "ppx_sexp_conv" {with-test & >= "v0.14" & < "v0.15"}
   "ppx_expect" {with-test & >= "v0.14" & < "v0.15"}
   "stdio" {with-test & >= "v0.14" & < "v0.15"}
   "odoc" {with-doc}

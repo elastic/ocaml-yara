@@ -33,6 +33,11 @@
     :with-test
     (>= v0.14)
     (< v0.15)))
+  (ppx_sexp_conv
+   (and
+    :with-test
+    (>= v0.14)
+    (< v0.15)))
   (ppx_expect
    (and
     :with-test
