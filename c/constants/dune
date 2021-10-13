@@ -1,0 +1,4 @@
+(library
+ (name yara_constants)
+ (public_name yara.constants)
+ (libraries ctypes.stubs))

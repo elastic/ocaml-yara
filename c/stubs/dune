@@ -1,0 +1,11 @@
+(library
+ (name yara_stubs)
+ (public_name yara.stubs)
+ (libraries ctypes.stubs yara.constants))
+
+(rule
+ (targets yara_generated_constants.ml)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ../stubgen/generate_yara_constants_ocaml))))

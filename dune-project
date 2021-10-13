@@ -4,6 +4,8 @@
 
 (license Apache-2.0)
 
+(use_standard_c_and_cxx_flags false)
+
 (source
  (github elastic/ocaml-yara))
 

@@ -65,33 +65,33 @@ let err exn =
     int
 
 (* Setup and teardown *)
-let initialize = wrap "yr_initialize" (void @-> returning int)
 let initialize () =
-  let i = initialize () in
+  let (i, err) = Yara_c.initialize () in
   if i = 0 then
     Yr.ok ()
   else
-    Yr.error i
+    Yr.error (Signed.SInt.to_int err)
 let initialize_exn () = Yr.unwrap @@ initialize ()
 
-let finalize = wrap "yr_finalize" (void @-> returning int)
 let finalize () =
-  let i = finalize () in
+  let (i, err) = Yara_c.finalize () in
   if i = 0 then
     Yr.ok ()
   else
-    Yr.error i
+    Yr.error (Signed.SInt.to_int err)
 let finalize_exn () = Yr.unwrap @@ finalize ()
 
 module Rule = struct
-  type t = unit ptr
+  type t = Yara_c.Yr_rule.t ptr
 
-  external get_identifier : Nativeint.t -> string = "ml_yr_rule_get_identifier"
-  external get_namespace : Nativeint.t -> string = "ml_yr_rule_get_namespace"
+  let get_identifier rule =
+    let rule = !@rule in
+    getf rule Yara_c.Yr_rule.identifier
 
-  let get_identifier rule = get_identifier (raw_address_of_ptr rule)
-
-  let get_namespace rule = get_namespace (raw_address_of_ptr rule)
+  let get_namespace rule =
+    let rule = !@rule in
+    let ns = !@(getf rule Yara_c.Yr_rule.namespace) in
+    getf ns Yara_c.Yr_namespace.name
 end
 
 module Rules = struct
@@ -156,14 +156,19 @@ module Rules = struct
   let callback_result = view ~read:callback_of_int ~write:int_of_callback int
 
   let callback_c =
-    message_kind @-> ptr void @-> ptr void @-> returning callback_result
+    ptr void
+    @-> message_kind
+    @-> ptr void
+    @-> ptr void
+    @-> returning callback_result
   let callback_ptr = funptr ~runtime_lock:true callback_c
 
-  let wrap_callback f message content _user_data =
+  let wrap_callback f _yara_ctx message content _user_data =
     let content =
       match message with
-      | Rule_matching_kind -> Rule_matching content
-      | Rule_not_matching_kind -> Rule_not_matching content
+      | Rule_matching_kind -> Rule_matching (from_voidp Yara_c.Yr_rule.t content)
+      | Rule_not_matching_kind ->
+        Rule_not_matching (from_voidp Yara_c.Yr_rule.t content)
       | Scan_finished_kind -> Scan_finished
       | Import_module_kind -> Import_module
       | Module_imported_kind -> Module_imported
