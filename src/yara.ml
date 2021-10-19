@@ -321,11 +321,10 @@ module Rules = struct
     | Ok () -> ()
     | Error (`Yara_rules e) -> raise @@ Scan_error e
 
-  let scan_names_callback ~matched ~missed message =
-    let name rule = Rule.get_identifier rule in
+  let scan_rules_callback ~matched ~missed message =
     ( match message with
-    | Rule_not_matching rule -> missed := name rule :: !missed
-    | Rule_matching rule -> matched := name rule :: !matched
+    | Rule_not_matching rule -> missed := rule :: !missed
+    | Rule_matching rule -> matched := rule :: !matched
     | Scan_finished
     | Import_module
     | Module_imported ->
@@ -333,14 +332,28 @@ module Rules = struct
     );
     `Continue
 
-  let scan_names ?flags ?timeout rules bytes =
+  let scan_rules ?flags ?timeout rules bytes =
     let matched = ref [] in
     let missed = ref [] in
     let result =
-      scan ?flags ?timeout (scan_names_callback ~matched ~missed) rules bytes
+      scan ?flags ?timeout (scan_rules_callback ~matched ~missed) rules bytes
     in
     match result with
     | Ok () -> Ok (`Matches !matched, `Misses !missed)
+    | Error _ as e -> e
+
+  let scan_rules_exn ?flags ?timeout rules bytes =
+    match scan_rules ?flags ?timeout rules bytes with
+    | Ok c -> c
+    | Error (`Yara_rules e) -> raise @@ Scan_error e
+
+  let scan_names ?flags ?timeout rules bytes =
+    match scan_rules ?flags ?timeout rules bytes with
+    | Ok (`Matches matches, `Misses misses) ->
+      let names_of_rules rules =
+        List.map (fun rule -> Rule.get_identifier rule) rules
+      in
+      Ok (`Matches (names_of_rules matches), `Misses (names_of_rules misses))
     | Error _ as e -> e
 
   let scan_names_exn ?flags ?timeout rules bytes =
