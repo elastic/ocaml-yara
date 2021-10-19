@@ -131,7 +131,28 @@ module Rules : sig
     t ->
     string ->
     [ `Matches of string list ] * [ `Misses of string list ]
-  (** Like {!count} except that it raises if there is an error during scanning.
+  (** Like {!scan_names_exn} except that it raises if there is an error during
+      scanning.
+
+      @raise Scan_error if there is an error scanning the sample *)
+
+  val scan_rules :
+    ?flags:'a ->
+    ?timeout:int ->
+    t ->
+    string ->
+    ([ `Matches of Rule.t list ] * [ `Misses of Rule.t list ]) result
+  (** [scan_rules ?flags ?timeout t bytes] returns the rules that match or miss
+      [t] against [bytes]. *)
+
+  val scan_rules_exn :
+    ?flags:'a ->
+    ?timeout:int ->
+    t ->
+    string ->
+    [ `Matches of Rule.t list ] * [ `Misses of Rule.t list ]
+  (** Like {!scan_rules_exn} except that it raises if there is an error during
+      scanning.
 
       @raise Scan_error if there is an error scanning the sample *)
 

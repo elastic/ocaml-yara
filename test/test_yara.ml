@@ -47,26 +47,6 @@ let%expect_test "Can scan for rule names" =
     Matches: (second_rule hello_ocaml)
     Misses: () |}]
 
-let scan_matching_rules_callback matched message =
-  ( match message with
-  | Yara.Rules.Rule_not_matching _ -> ()
-  | Rule_matching rule -> matched := rule :: !matched
-  | Scan_finished
-  | Import_module
-  | Module_imported ->
-    ()
-  );
-  `Continue
-
-let scan_matching_rules rules input =
-  let matched = ref [] in
-  let result =
-    Yara.Rules.scan (scan_matching_rules_callback matched) rules input
-  in
-  match result with
-  | Ok () -> Ok !matched
-  | Error _ as e -> e
-
 let sexp_of_rule t =
   let sexp_of_metadata (kind : Yara.Rule.metadata) =
     match kind with
@@ -84,11 +64,17 @@ let%expect_test "Can parse yara rules with metadata" =
   Yara.init_dynamic ();
   Yara.initialize_exn ();
   let rules = prepare_rule ~namespace:"MyNamespace" [ rule1; rule2 ] in
-  match scan_matching_rules rules "Hello OCaml" with
+  match Yara.Rules.scan_rules rules "Hello OCaml" with
   | Error err -> printf "%s" (Caml.Format.asprintf "%a" Yara.Rules.pp_error err)
-  | Ok rules ->
+  | Ok (`Matches rules, `Misses misses) ->
+    print_endline "Matches: ";
     print_s (sexp_of_list sexp_of_rule rules);
+    print_endline "Misses: ";
+    print_s (sexp_of_list sexp_of_rule misses);
     [%expect
       {|
+        Matches:
         ((second_rule MyNamespace ())
-         (hello_ocaml MyNamespace ((category test) (version 1) (test_bool false)))) |}]
+         (hello_ocaml MyNamespace ((category test) (version 1) (test_bool false))))
+        Misses:
+        () |}]
